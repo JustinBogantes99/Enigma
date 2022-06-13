@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 from cgitb import text
+from glob import glob
 from importlib.resources import path
 from multiprocessing.connection import wait
 from time import sleep
 from tkinter import *
+from tkinter import ttk
 from unittest.mock import patch #Libreria para crear la interfaz grafica
 from enigma import Enigma
+from tkinter import messagebox
 teclado=[["Q","W","E","R","T","Y","U","I","O"],["P","A","S","D","F","G","H","J","K"],["L","Ñ","Z","X","C","V","B","N","M"]]
 listaLabels=[]
 listaBotones=[]
@@ -49,12 +52,33 @@ def cambiarLabel(letra,canvas):
             valor.config(background="#FFE4B5")
             canvas.update()
             break
-    
+def cambiarKeyword(palabra):
+    global rotor1,rotor2,rotor3
+    if '' in palabra:
+        messagebox.showerror(title="Error 404", message="Error si desea cambiar la keyword debe seleccionar los 3 valores")
+    else:
+        keyword=''
+        for x in palabra:
+            keyword+=x
+        maquina.config(stackerbrett={" ":" ",".":"."},keyword=keyword)
+        rotor1['text']=keyword[0]
+        rotor2['text']=keyword[1]
+        rotor3['text']=keyword[2]
+
+def reiniciar():
+    global rotor1,rotor2,rotor3,palabraEncriptada,palabraDesencriptada
+    rotor1['text']='A'
+    rotor2['text']='A'
+    rotor3['text']='A'
+    palabraDesencriptada['text']="Mensaje: "
+    palabraEncriptada['text']="Mensaje encriptado: "  
+    maquina.config(stackerbrett={" ":" ",".":"."},keyword="AAA")
+
 def ventana_iniciar(ventana):
     global listaLabels,listaBotones,rotor1,rotor2,rotor3,palabraEncriptada,palabraDesencriptada
-    frme_venta_iniciar=Frame(ventana,width=750,height=695,bg="green")
+    frme_venta_iniciar=Frame(ventana,width=750,height=695,bg="#FFE4B5")
     frme_venta_iniciar.place(x=0,y=0)
-    frm_secundario=Frame(ventana,width=400,height=200,bg="red")
+    frm_secundario=Frame(ventana,width=400,height=200,bg="#FFE4B5")
     frm_secundario.place(x=20,y=400)
     rotor1=Label(ventana,text=maquina.rotorI[0][rotorDer],bd=30,bg="#FFE4B5")
     rotor1.place(x=210,y=250)
@@ -66,11 +90,34 @@ def ventana_iniciar(ventana):
     palabraEncriptada.place(x=10,y=310)
     palabraDesencriptada=Label(ventana,text="Mensaje: ",bd=10,bg="#FFE4B5")
     palabraDesencriptada.place(x=10,y=340)
-    btn_salir=Button(ventana,text="Reiniciar",command=lambda:[],bg="#FFE4B5",highlightthickness=0,bd=0,activebackground="khaki1")
-    btn_salir.place(x=80,y=640)
-
-    #rotor2=Label(frme_venta_iniciar,text=maquina.rotorII[1][0],bd=30,bg="#FFE4B5").place(x=400,y=400)
-    #rotor2=Label(frme_venta_iniciar,text=maquina.rotorIII[1][0],bd=30,bg="#FFE4B5").place(x=400,y=400)
+    btn_reiniciar=Button(ventana,text="Reiniciar",command=lambda:[reiniciar()],highlightthickness=1,bd=3,activebackground="khaki1")
+    btn_reiniciar.place(x=20,y=640)
+    valores=[]
+    for x in range(len(teclado)):
+        for y in range(len(teclado[0])):
+            valores+=[teclado[x][y]]
+    valores.sort()
+    valores.remove("Ñ")
+    combo1 = ttk.Combobox(
+        state="readonly",
+        values=valores,
+        width=8
+    )
+    combo1.place(x=150,y=600)
+    combo2 = ttk.Combobox(
+        state="readonly",
+        values=valores,
+        width=8
+    )
+    combo2.place(x=250,y=600)
+    combo3 = ttk.Combobox(
+        state="readonly",
+        values=valores,
+        width=8
+    )
+    combo3.place(x=350,y=600)
+    btn_cambiar_Keyword=Button(ventana,text="Nueva Keyword",command=lambda:[cambiarKeyword([combo1.get(),combo2.get(),combo3.get()])],highlightthickness=1,bd=3,activebackground="khaki1")
+    btn_cambiar_Keyword.place(x=430,y=600)
     for i in range(len(teclado)):
         for j in range(len(teclado[0])):
             casilla2=Canvas(frme_venta_iniciar,highlightthickness=0,bd=1,width=90,height=93) 
