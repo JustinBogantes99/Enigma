@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from os import path as path2
 from cgitb import text
 from glob import glob
 from importlib.resources import path
@@ -23,6 +24,7 @@ rotorDer=0
 contIz=0
 contCentro=0
 contDer=0
+mEncriptado=""
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 #E:Recibe un boton y un color
@@ -36,13 +38,14 @@ def cerrar_ventana_ayuda(abrir,cerrar):
     cerrar.deiconify()
 
 def cambiarLabel(letra,canvas):
-    global rotorDer,rotorCentro,rotorIz,contDer,contCentro,rotor1,rotor2,rotor3,palabraEncriptada,palabraDesencriptada
+    global rotorDer,rotorCentro,rotorIz,contDer,contCentro,rotor1,rotor2,rotor3,palabraEncriptada,palabraDesencriptada,mEncriptado
     palabraDesencriptada['text']=palabraDesencriptada['text']+letra
     x=maquina.cifrar(letra)
     rotor1['text']=maquina.rotorI[0][0]
     rotor2['text']=maquina.rotorII[0][0]
     rotor3['text']=maquina.rotorIII[0][0]
-    palabraEncriptada['text']=palabraEncriptada['text']+x    
+    palabraEncriptada['text']=palabraEncriptada['text']+x
+    mEncriptado=mEncriptado+x    
     for valor in listaLabels:
         if valor['text']==x:
             valor.config(background="red")
@@ -74,8 +77,43 @@ def reiniciar():
     palabraEncriptada['text']="Mensaje encriptado: "  
     maquina.config(stackerbrett={" ":" ",".":"."},keyword="AAA")
 
+def guardar(ventana):
+    global mEncriptado, mensajeCargado
+    nuevoArchivo="Mensaje.txt"
+    i = 1
+    flag = True
+
+    while(flag):
+        if not path2.exists("Mensaje"+".txt"):
+            flag = False
+
+        elif not (path2.exists("Mensaje"+"("+str(i)+").txt")):
+            flag = False
+            nuevoArchivo = "Mensaje"+"("+str(i)+").txt"
+        
+        else:
+            i += 1
+    
+    archv = open(nuevoArchivo, "a")
+    archv.write(mEncriptado)
+    archv.close()
+
+    mensajeCargado['text'] = "Guardado en "+nuevoArchivo
+    ventana.update()
+
+def cargar(ventana):
+    global txt_charge, mensajeCargado
+    if(isinstance(txt_charge.get(), str)):
+        lines = open(txt_charge.get(),"r")
+        for line in lines:
+            mensajeCargado['text'] = line
+    else:
+        mensajeCargado['text'] = "No se ha encontrado el .txt"
+    ventana.update()
+        
+
 def ventana_iniciar(ventana):
-    global listaLabels,listaBotones,rotor1,rotor2,rotor3,palabraEncriptada,palabraDesencriptada
+    global listaLabels,listaBotones,rotor1,rotor2,rotor3,palabraEncriptada,palabraDesencriptada, txt_charge, mensajeCargado
     frme_venta_iniciar=Frame(ventana,width=750,height=695,bg="#FFE4B5")
     frme_venta_iniciar.place(x=0,y=0)
     frm_secundario=Frame(ventana,width=400,height=200,bg="#FFE4B5")
@@ -92,6 +130,15 @@ def ventana_iniciar(ventana):
     palabraDesencriptada.place(x=10,y=340)
     btn_reiniciar=Button(ventana,text="Reiniciar",command=lambda:[reiniciar()],highlightthickness=1,bd=3,activebackground="khaki1")
     btn_reiniciar.place(x=20,y=640)
+    btn_guardar=Button(ventana,text="Guardar Mensaje",command=lambda:[guardar(ventana)],highlightthickness=1,bd=3,activebackground="khaki1")
+    btn_guardar.place(x=100,y=640)
+    btn_cargar=Button(ventana,text="Cargar Mensaje",command=lambda:[cargar(ventana)],highlightthickness=1,bd=3,activebackground="khaki1")
+    btn_cargar.place(x=220,y=640)
+    txt_charge=ttk.Entry(width = 20)
+    txt_charge.place(x=340,y=645)
+    txt_charge.insert(0, "Mensaje.txt")
+    mensajeCargado=Label(ventana,text="",bd=10,bg="#FFE4B5")
+    mensajeCargado.place(x=470,y=635)
     valores=[]
     for x in range(len(teclado)):
         for y in range(len(teclado[0])):
@@ -116,7 +163,7 @@ def ventana_iniciar(ventana):
         width=8
     )
     combo3.place(x=350,y=600)
-    btn_cambiar_Keyword=Button(ventana,text="Nueva Keyword",command=lambda:[cambiarKeyword([combo1.get(),combo2.get(),combo3.get()])],highlightthickness=1,bd=3,activebackground="khaki1")
+    btn_cambiar_Keyword=Button(ventana,text="Nueva Keyword",command=lambda:[cambiarKeyword([combo3.get(),combo2.get(),combo1.get()])],highlightthickness=1,bd=3,activebackground="khaki1")
     btn_cambiar_Keyword.place(x=430,y=600)
     for i in range(len(teclado)):
         for j in range(len(teclado[0])):
